@@ -433,6 +433,26 @@ export interface CartTotals {
     payment_options: PaymentOption[];
     issues: Array<{ item_id: number | null; code: string; message: string; min?: number }>;
     can_checkout: boolean;
+    /** Uygulanan hediye çekleri (kod maskeli). */
+    gift_cards: AppliedGiftCard[];
+    gift_card_total: number;
+    /** Ödeme yöntemiyle tahsil edilecek tutar (`grand_total − gift_card_total`). */
+    amount_due: number;
+    /** false → çek tutarın tamamını karşılıyor, ödeme adımı gösterilmez. */
+    payment_required: boolean;
+}
+
+export interface AppliedGiftCard {
+    id: number;
+    /** "••••-••••-••••-AB12" */
+    code: string;
+    currency: string;
+    balance: number;
+    applied: number;
+    balance_after: number;
+    expires_at: string | null;
+    valid: boolean;
+    message: string | null;
 }
 
 export interface Cart {
@@ -447,6 +467,7 @@ export interface Cart {
     shipping_method_id: number | null;
     payment_method_id: number | null;
     coupon_code: string | null;
+    gift_card_ids: number[];
     notes: string | null;
     accepts_marketing: boolean;
     expires_at: string | null;
@@ -531,11 +552,16 @@ export interface Order {
     fee_total: number;
     tax_total: number;
     grand_total: number;
+    /** Hediye çekiyle ödenen kısım. */
+    gift_card_total: number;
+    /** Ödeme yöntemiyle ödenecek tutar (havale talimatında bu tutar). */
+    amount_due: number;
     prices_include_tax: boolean;
     shipping_address: Address | null;
     billing_address: Address | null;
     shipping_method: { id: number; name: string; carrier: string | null; lead_days: number | null } | null;
-    payment_method: { id: number; driver: string; name: string; instructions: string | null } | null;
+    /** Tamamı hediye çekiyle ödenen siparişte `driver: 'gift_card'`, `id: null`. */
+    payment_method: { id: number | null; driver: string; name: string; instructions: string | null } | null;
     coupon_code: string | null;
     notes: string | null;
     tracking: Tracking | null;
@@ -620,6 +646,10 @@ export interface ShopClient {
         removeItem(token: string, itemId: number, opts?: RequestOptions): Promise<Cart>;
         applyCoupon(token: string, code: string, opts?: RequestOptions): Promise<Cart>;
         removeCoupon(token: string, opts?: RequestOptions): Promise<Cart>;
+        /** Hediye çeki — geçersiz / süresi dolmuş / bakiyesiz / para birimi uyuşmuyorsa ShopValidationError. */
+        applyGiftCard(token: string, code: string, opts?: RequestOptions): Promise<Cart>;
+        /** `id`: `totals.gift_cards[].id` */
+        removeGiftCard(token: string, id: number, opts?: RequestOptions): Promise<Cart>;
     };
     checkout(cartToken: string, body: { accept_terms: true; email?: string; phone?: string; notes?: string }, opts?: RequestOptions): Promise<Order>;
     orders: {

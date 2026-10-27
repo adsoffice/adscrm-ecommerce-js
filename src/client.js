@@ -187,6 +187,13 @@ export function createShop(options = {}) {
             removeCoupon(token, opts) {
                 return data(write('DELETE', `carts/${enc(token)}/coupon`, undefined, opts));
             },
+            /** Hediye çeki kodu — ödenecek tutardan düşülür (`totals.amount_due`); kod yanıtta maskelidir. */
+            applyGiftCard(token, code, opts) {
+                return data(write('POST', `carts/${enc(token)}/gift-cards`, { code }, opts));
+            },
+            removeGiftCard(token, id, opts) {
+                return data(write('DELETE', `carts/${enc(token)}/gift-cards/${enc(id)}`, undefined, opts));
+            },
         },
 
         /**

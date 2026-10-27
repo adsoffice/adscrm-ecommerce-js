@@ -3,7 +3,7 @@
 AdsCRM **E-Ticaret (Delivery) API** istemcisi — React ve Next.js mağazaları için.
 
 - ✅ **Katalog** — kategori ağacı, markalar, ürün listesi + filtre yüzeyi (facet), arama, ürün detayı (varyantlar, renge göre değişen galeriler, özellikler, ilgili ürünler, SEO, JSON-LD).
-- ✅ **Sepet → checkout → ödeme** — sunucuda hesaplanan toplamlar (kampanya, kupon, hediye, kargo, KDV), havale / kapıda ödeme, **iyzico** ve **PayTR** (yönlendirme / iframe).
+- ✅ **Sepet → checkout → ödeme** — sunucuda hesaplanan toplamlar (kampanya, kupon, hediye ürün, hediye çeki, kargo, KDV), havale / kapıda ödeme, **iyzico** ve **PayTR** (yönlendirme / iframe).
 - ✅ **Sipariş** — takip, kısmi kargo paketleri, havale bildirimi, yeniden ödeme, **iade talebi**.
 - ✅ **Değerlendirmeler + soru-cevap** — puan özeti ve dağılımı, "satın aldı" rozeti, mağaza yanıtı, gönderim (moderasyonlu).
 - ✅ **Müşteri hesabı** — kayıt, giriş, şifre sıfırlama, adres defteri, siparişler.
@@ -192,6 +192,8 @@ await shop.cart.addItem(cart.token, { product_id: 12, variant_id: 41, qty: 2 });
 await shop.cart.updateItem(cart.token, itemId, 3);                  // 0 → sil
 await shop.cart.removeItem(cart.token, itemId);
 await shop.cart.applyCoupon(cart.token, 'HOSGELDIN');               // geçersizse ShopValidationError
+await shop.cart.applyGiftCard(cart.token, 'ABCD-EFGH-JKLM-NP23');   // hediye çeki → totals.amount_due azalır
+await shop.cart.removeGiftCard(cart.token, cart.totals.gift_cards[0].id);
 await shop.cart.update(cart.token, {
   email, phone, shipping_address, billing_address: null,            // null → teslimatla aynı
   shipping_method_id, payment_method_id, notes, accepts_marketing,  // ticari ileti onayı
@@ -202,6 +204,11 @@ await shop.cart.update(cart.token, {
 `promotions[]`, `promotions_skipped[]`, `coupon`, `shipping_options[]`, `payment_options[]`, `subtotal`,
 `discount_total`, `shipping_total`, `fee_total`, `tax_total`, `grand_total`, `issues[]`, `can_checkout`.
 Tüm tutarlar **sunucuda** hesaplanır; istemci tutar göndermez.
+
+**Hediye çeki** bir ödeme aracıdır: `grand_total` ve KDV değişmez, `gift_card_total` kadar `amount_due` azalır.
+`payment_required: false` ise (çek tamamını karşılıyor) ödeme adımını gizleyin — sipariş doğrudan "ödendi" olur.
+Çek yalnızca kendi para birimindeki sepette geçerlidir; iptal edilen siparişte bakiye geri yüklenir.
+Havale talimatında `order.amount_due` tutarını gösterin.
 
 Yardımcılar: `itemCount(totals)` · `isEmpty(totals)` · `freeShippingRemaining(totals, promotions)` (kargo bedava çubuğu) ·
 `cartIssues(totals)` · `lineIssue(totals, itemId)`.
