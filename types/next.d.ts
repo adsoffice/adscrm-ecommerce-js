@@ -19,7 +19,8 @@ export function cookieOptions(options?: { maxAge?: number; secure?: boolean }): 
 
 /** Ürün sayfası `generateMetadata` çıktısı. */
 export function productMetadata(product: ProductDetail, options?: { siteName?: string; baseUrl?: string }): {
-    title?: string;
+    /** Paneldeki SEO başlığı varsa `{ absolute }` (site adı şablona tekrar eklenmez). */
+    title?: string | { absolute: string };
     description?: string;
     alternates?: { canonical: string };
     openGraph: Record<string, unknown>;

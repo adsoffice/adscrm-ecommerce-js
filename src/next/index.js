@@ -42,14 +42,17 @@ export function cookieOptions({ maxAge = 60 * 60 * 24 * 30, secure = process.env
 /**
  * Ürün sayfası metadata'sı (`generateMetadata`) — başlık/açıklama ürünün SEO
  * alanlarından, canonical ürün adresi, Open Graph görseli ilk görsel.
+ * Paneldeki SEO başlığı zaten tam başlıktır (site adını içerir) → `absolute`
+ * olarak verilir; layout'taki `%s | Site` şablonu ikinci kez eklemez.
  */
 export function productMetadata(product, { siteName, baseUrl } = {}) {
-    const title = product?.seo?.title || product?.name;
+    const seoTitle = product?.seo?.title;
+    const title = seoTitle || product?.name;
     const description = product?.seo?.description || product?.short_description || undefined;
     const image = product?.images?.[0]?.url || product?.image?.url;
     const url = product?.url && baseUrl ? new URL(product.url, baseUrl).toString() : product?.url;
     return {
-        title,
+        title: seoTitle ? { absolute: seoTitle } : title,
         description,
         alternates: url ? { canonical: url } : undefined,
         openGraph: {
