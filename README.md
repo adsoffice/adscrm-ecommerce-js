@@ -5,6 +5,7 @@ AdsCRM **E-Ticaret (Delivery) API** istemcisi — React ve Next.js mağazaları 
 - ✅ **Katalog** — kategori ağacı, markalar, ürün listesi + filtre yüzeyi (facet), arama, ürün detayı (varyantlar, renge göre değişen galeriler, özellikler, ilgili ürünler, SEO, JSON-LD).
 - ✅ **Sepet → checkout → ödeme** — sunucuda hesaplanan toplamlar (kampanya, kupon, hediye, kargo, KDV), havale / kapıda ödeme, **iyzico** ve **PayTR** (yönlendirme / iframe).
 - ✅ **Sipariş** — takip, kısmi kargo paketleri, havale bildirimi, yeniden ödeme, **iade talebi**.
+- ✅ **Değerlendirmeler + soru-cevap** — puan özeti ve dağılımı, "satın aldı" rozeti, mağaza yanıtı, gönderim (moderasyonlu).
 - ✅ **Müşteri hesabı** — kayıt, giriş, şifre sıfırlama, adres defteri, siparişler.
 - ✅ **B2B** — oturum açmış bayinin grup fiyatı (fiyat listesi / grup indirimi), görünür kategoriler.
 - ✅ **Çoklu para birimi** — `?currency=EUR` çevrimli fiyat ya da para biriminin elle fiyat listesi.
@@ -166,6 +167,22 @@ oturumlu istekler (bayi fiyatı kişiye özeldir), sepet, sipariş ve hesap uçl
 
 URL ↔ süzgeç: `parseFilters(searchParams)` · `filtersToSearchParams(filters)` (`?brand=nord&opt.renk=kirmizi&attr.malzeme=pamuk`) ·
 `toggleFilter(filters, 'opt', 'renk', 'mavi')` · `setFilter(filters, 'sort', '-price')` · `isSelected(…)` · `activeFilterCount(filters)`.
+
+### Değerlendirmeler ve soru-cevap
+
+```js
+const { data, meta } = await shop.reviews('basic-tisort', { page: 1, rating: 5, sort: '-created' });
+meta.summary   // { average: 4.3, count: 12, distribution: { '5': 7, '4': 3, … } }
+data[0]        // { author: 'Ayşe Y.', rating, title, body, verified_purchase, reply, created_at }
+
+await shop.questions('basic-tisort');                     // yalnızca yanıtlanmış sorular
+await shop.submitReview('basic-tisort', { rating: 5, body: '…', author_name, email });   // üyede ad/e-posta gerekmez
+await shop.askQuestion('basic-tisort', { question: '…', author_name, email });
+```
+
+Yorumlar mağaza ayarına göre onay bekler (`settings().reviews.auto_approve`); `require_purchase` açıksa yalnızca
+ürünü almış üye yazabilir. Kartta ve detayda `product.rating` (`{ average, count }`), sıralamada `sort: '-rating'`;
+`structured_data` puan varsa `aggregateRating` + son yorumları içerir.
 
 ### Sepet
 

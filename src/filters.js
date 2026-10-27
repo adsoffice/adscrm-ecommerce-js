@@ -18,7 +18,7 @@
  * adres kendinden açıklamalıdır ve API'ye birebir çevrilir.
  */
 
-export const SORTS = ['default', 'price', '-price', '-created', 'name'];
+export const SORTS = ['default', 'price', '-price', '-created', 'name', '-rating'];
 
 const SCALAR = ['category', 'q', 'sort'];
 const NUMERIC = ['price_min', 'price_max', 'page', 'limit'];

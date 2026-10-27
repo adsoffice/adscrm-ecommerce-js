@@ -126,6 +126,31 @@ export function createShop(options = {}) {
             return data(fresh('stock', { ...opts, query: { skus: [].concat(skus).slice(0, 100) } }));
         },
 
+        /* ── Değerlendirmeler ve soru-cevap ───────────────────────── */
+
+        /**
+         * Onaylı değerlendirmeler — `{ data, meta: { total, page, last_page, summary: { average, count, distribution } } }`.
+         * `{ page, limit, rating (1–5), sort: '-created' | '-rating' | 'rating' }`
+         */
+        reviews(slug, { page, limit, rating, sort, ...opts } = {}) {
+            return call(`products/${enc(slug)}/reviews`, { ...opts, query: { page, limit, rating, sort } });
+        },
+        /** Yanıtlanmış sorular — `{ data, meta }`. */
+        questions(slug, { page, limit, ...opts } = {}) {
+            return call(`products/${enc(slug)}/questions`, { ...opts, query: { page, limit } });
+        },
+        /**
+         * Değerlendirme gönder — `{ rating, title?, body?, author_name?, email? }` (misafirde ad + e-posta zorunlu;
+         * üye oturumunda hesaptan alınır). Yanıt: `{ message, data: { id, status: 'pending' | 'approved' } }`.
+         */
+        submitReview(slug, body, opts) {
+            return write('POST', `products/${enc(slug)}/reviews`, { locale: config.locale, ...body }, opts);
+        },
+        /** Soru sor — `{ question, author_name?, email? }`; yanıtlanınca yayınlanır. */
+        askQuestion(slug, body, opts) {
+            return write('POST', `products/${enc(slug)}/questions`, { locale: config.locale, ...body }, opts);
+        },
+
         /* ── Sepet (yazma · önbelleksiz) ──────────────────────────── */
 
         cart: {

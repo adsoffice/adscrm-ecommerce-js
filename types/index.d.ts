@@ -26,6 +26,46 @@ export interface Paginated<T> {
     };
 }
 
+export interface Review {
+    id: number;
+    /** Kısaltılmış ad ("Ayşe Y."). */
+    author: string;
+    rating: number;
+    title: string | null;
+    body: string | null;
+    /** Kargolanmış / teslim edilmiş siparişle doğrulandı. */
+    verified_purchase: boolean;
+    /** Mağaza yanıtı */
+    reply: string | null;
+    replied_at: string | null;
+    created_at: string;
+}
+
+export interface ReviewSummary {
+    average: number;
+    count: number;
+    /** "5" … "1" → adet */
+    distribution: Record<'5' | '4' | '3' | '2' | '1', number>;
+}
+
+export interface ProductQuestion {
+    id: number;
+    author: string;
+    question: string;
+    answer: string;
+    answered_at: string;
+    created_at: string;
+}
+
+export interface ReviewInput {
+    rating: 1 | 2 | 3 | 4 | 5;
+    title?: string;
+    body?: string;
+    /** Misafirde zorunlu (üye oturumunda hesaptan alınır). */
+    author_name?: string;
+    email?: string;
+}
+
 export interface CurrencyMeta {
     currency: string;
     base_currency: string;
@@ -79,6 +119,7 @@ export interface ShopSettings {
     paths: Record<'product' | 'category' | 'brand' | 'cart', string>;
     paths_i18n: Record<string, Partial<Record<'product' | 'category' | 'brand' | 'cart', string>>>;
     returns: { enabled: boolean; days: number; instructions: string | null };
+    reviews: { enabled: boolean; auto_approve: boolean; require_purchase: boolean; questions_enabled: boolean };
 }
 
 export interface Region {
@@ -179,6 +220,8 @@ export interface ProductCard extends PriceBlock {
     is_featured: boolean;
     is_new: boolean;
     ships_free: boolean;
+    /** Onaylı değerlendirmelerin özeti (yorum yoksa `count: 0`). */
+    rating: { average: number; count: number };
     swatches: Swatch[];
 }
 
@@ -258,7 +301,7 @@ export interface ProductFilters {
     featured?: boolean;
     new?: boolean;
     q?: string;
-    sort?: 'default' | 'price' | '-price' | '-created' | 'name';
+    sort?: 'default' | 'price' | '-price' | '-created' | 'name' | '-rating';
     page?: number;
     limit?: number;
 }
@@ -563,6 +606,10 @@ export interface ShopClient {
     product(slug: string, opts?: RequestOptions): Promise<ProductDetail>;
     filters(filters?: ProductFilters, opts?: RequestOptions): Promise<Facets>;
     stock(skus: string | string[], opts?: RequestOptions): Promise<StockRow[]>;
+    reviews(slug: string, opts?: RequestOptions & { page?: number; limit?: number; rating?: number; sort?: '-created' | '-rating' | 'rating' }): Promise<Paginated<Review> & { meta: { summary: ReviewSummary } }>;
+    questions(slug: string, opts?: RequestOptions & { page?: number; limit?: number }): Promise<Paginated<ProductQuestion>>;
+    submitReview(slug: string, body: ReviewInput, opts?: RequestOptions): Promise<{ message: string; data: { id: number; status: 'pending' | 'approved' } }>;
+    askQuestion(slug: string, body: { question: string; author_name?: string; email?: string }, opts?: RequestOptions): Promise<{ message: string; data: { id: number; status: 'pending' } }>;
 
     cart: {
         create(body?: { currency?: string; locale?: string }, opts?: RequestOptions): Promise<Cart>;
