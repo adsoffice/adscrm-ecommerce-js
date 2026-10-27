@@ -209,7 +209,8 @@ export interface ProductCard extends PriceBlock {
     slug: string;
     short_description: string | null;
     sku: string | null;
-    type: 'simple' | 'variable';
+    /** bundle = paket (birden fazla ürün, stoğu bileşenlerden) — içerik `ProductDetail.bundle`. */
+    type: 'simple' | 'variable' | 'bundle';
     price_range: { min: Money; max: Money } | null;
     tax_rate_bp: number;
     image: Image | null;
@@ -278,6 +279,8 @@ export interface ProductDetail extends ProductCard {
     purchase: { min_qty: number; max_qty: number | null; qty_step: number; allow_backorder: boolean };
     shipping: { weight_g: number | null; desi: number | null; dimensions_mm: Record<string, number> | null; ships_free: boolean; lead_days: number | null };
     related: { related: ProductCard[]; cross_sell: ProductCard[]; up_sell: ProductCard[] };
+    /** Yalnızca paket üründe dolu. */
+    bundle: BundleInfo | null;
     seo: { title?: string; description?: string; [key: string]: unknown } | null;
     fields: Record<string, unknown>;
     /** Vitrin yolu (mağaza adres kalıbından). */
@@ -356,6 +359,38 @@ export interface Address {
     identity_no?: string | null;
 }
 
+export interface BundleInfo {
+    items: Array<{
+        product_id: number;
+        variant_id: number | null;
+        name: string;
+        /** Bileşen vitrinde ayrıca satılıyorsa adresi */
+        slug: string | null;
+        variant_title: string | null;
+        sku: string | null;
+        /** Paket başına adet */
+        qty: number;
+        image: Image | null;
+        /** Ayrı alındığındaki birim fiyat */
+        unit_price: Money;
+    }>;
+    /** Bileşenlerin ayrı ayrı toplamı */
+    items_total: Money;
+    /** Paketle kazanç (yalnızca pozitifse) */
+    savings: Money | null;
+    savings_percent: number | null;
+}
+
+/** Sepet / sipariş satırındaki paket içeriği — `qty` paket BAŞINA. */
+export interface BundleComponent {
+    product_id: number;
+    variant_id: number | null;
+    qty: number;
+    name: string;
+    variant_title: string | null;
+    sku: string | null;
+}
+
 export interface CartLine {
     item_id: number | null;
     product_id: number;
@@ -363,6 +398,7 @@ export interface CartLine {
     name: string;
     slug: string | null;
     variant_title: string | null;
+    bundle_items: BundleComponent[] | null;
     sku: string | null;
     image: string | null;
     qty: number;
@@ -511,6 +547,7 @@ export interface OrderItem {
     sku: string | null;
     name: string;
     variant_title: string | null;
+    bundle_items: BundleComponent[] | null;
     image: string | null;
     qty: number;
     unit_price: number;

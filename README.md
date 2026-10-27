@@ -259,6 +259,12 @@ await me.auth.logout();
 Oturumlu istemcide katalog uçları **bayi (müşteri grubu) fiyatını** döner: `price_source`
 `price_list` (bayi fiyatı) · `group` (grup indirimi) · `catalog` (kampanya) · `currency_list` · `base`.
 
+### Paket ürün
+
+`type: 'bundle'` ürünün `product(slug).bundle`'ı içeriği verir: `items[]` (ad, varyant, paket başına adet, görsel,
+ayrı fiyat), `items_total`, `savings`, `savings_percent`. Stok bileşenlerden hesaplanır (`in_stock`/`stock` olduğu gibi
+kullanılır); sepet ve sipariş satırında `bundle_items` içeriği taşır. Pakette varyant seçimi yoktur — doğrudan sepete eklenir.
+
 ### Varyantlar
 
 ```js
