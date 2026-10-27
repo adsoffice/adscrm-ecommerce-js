@@ -458,6 +458,19 @@ export interface OrderItem {
     shipped_qty: number;
 }
 
+/** Hesaptaki sipariş listesi satırı (`account.orders`) — detay için `account.order(number)`. */
+export interface OrderSummary {
+    number: string;
+    status: string;
+    status_label: string;
+    payment_status: Order['payment_status'];
+    grand_total: number;
+    currency: string;
+    /** Toplam ürün adedi */
+    item_count: number;
+    placed_at: string | null;
+}
+
 export interface Order {
     number: string;
     status: string;
@@ -582,7 +595,7 @@ export interface ShopClient {
         addAddress(address: Address & { is_default_shipping?: boolean; is_default_billing?: boolean }, opts?: RequestOptions): Promise<SavedAddress>;
         updateAddress(id: number, address: Address & { is_default_shipping?: boolean; is_default_billing?: boolean }, opts?: RequestOptions): Promise<SavedAddress>;
         deleteAddress(id: number, opts?: RequestOptions): Promise<unknown>;
-        orders(opts?: RequestOptions & { page?: number }): Promise<Paginated<Order>>;
+        orders(opts?: RequestOptions & { page?: number }): Promise<Paginated<OrderSummary>>;
         order(number: string, opts?: RequestOptions): Promise<Order>;
         requestReturn(number: string, body: ReturnRequest, opts?: RequestOptions): Promise<Order>;
     };

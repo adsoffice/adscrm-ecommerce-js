@@ -226,7 +226,8 @@ await shop.auth.resetPassword({ email, token, password });
 const me = shop.withCustomer(token);
 await me.account.get();  await me.account.update({ phone });
 await me.account.addresses(); await me.account.addAddress(address);
-await me.account.orders({ page: 1 }); await me.account.order(number);
+await me.account.orders({ page: 1 });   // özet satırlar (item_count) · detay: account.order(number)
+await me.account.order(number);
 await me.account.requestReturn(number, { items });
 await me.auth.logout();
 ```
